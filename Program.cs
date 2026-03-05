@@ -1,4 +1,6 @@
 using System.Text;
+using BookAppBackend.Data;
+using BookAppBackend.Models;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
