@@ -85,7 +85,13 @@ namespace BookAppBackend.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName!) }),
+                Subject = new ClaimsIdentity(
+                    new[]
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.Id),
+                        new Claim(ClaimTypes.Name, user.UserName!),
+                    }
+                ),
                 // Token expires after an hour
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
@@ -99,7 +105,7 @@ namespace BookAppBackend.Controllers
             var jwt = tokenHandler.WriteToken(token);
 
             // Return token and name of user to display in frontend
-            return Ok(new { token, displayName = user.DisplayName });
+            return Ok(new { token = jwt, displayName = user.DisplayName });
         }
     }
 }
