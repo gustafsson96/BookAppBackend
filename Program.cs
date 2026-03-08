@@ -51,6 +51,18 @@ builder
 // Register controllers
 builder.Services.AddControllers();
 
+// Enable cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowReact",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod();
+        }
+    );
+});
+
 var app = builder.Build();
 
 // Create database if it does not exist
@@ -61,6 +73,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowReact");
 
 // Identifies and validates user (checks for JWT and sets HttpContext.User)
 app.UseAuthentication();
