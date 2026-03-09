@@ -33,6 +33,27 @@ namespace BookAppBackend.Controllers
             return Ok(reviews);
         }
 
+        // GET api/reviews/myreviews
+        // Get all reviews created by the logged in user
+        [Authorize]
+        [HttpGet("myreviews")]
+        public async Task<ActionResult<IEnumerable<Review>>> GetMyReviews()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User is not authenticated.")
+            }
+
+                var reviews = await _context
+                .Reviews.Where(r => r.UserId == userId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+                return Ok(reviews);
+        }
+
         // POST: api/reviews
         // Create a new review for the logged in user
         [Authorize]
