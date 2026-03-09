@@ -23,11 +23,24 @@ namespace BookAppBackend.Controllers
         // GET: api/reviews/book/{bookId}
         // Get all reviews for a specific book
         [HttpGet("book/{bookId}")]
-        public async Task<ActionResult<IEnumerable<Review>>> GetReviewsByBookId(string bookId)
+        public async Task<ActionResult<IEnumerable<ReviewResponseDto>>> GetReviewsByBookId(
+            string bookId
+        )
         {
             var reviews = await _context
                 .Reviews.Where(r => r.BookId == bookId)
+                .Include(r => r.User)
                 .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new ReviewResponseDto
+                {
+                    Id = r.Id,
+                    BookId = r.BookId,
+                    UserId = r.UserId,
+                    DisplayName = r.User!.DisplayName,
+                    Text = r.Text,
+                    Rating = r.Rating,
+                    CreatedAt = r.CreatedAt,
+                })
                 .ToListAsync();
 
             return Ok(reviews);

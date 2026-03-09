@@ -9,4 +9,4 @@ namespace BookAppBackend.Dtos
         // Updated rating value
         public int Rating { get; set; }
     }
-}
+};

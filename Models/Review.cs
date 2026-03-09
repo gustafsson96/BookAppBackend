@@ -29,5 +29,8 @@ namespace BookAppBackend.Models
 
         // Store when review was created
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation property to the user
+        public ApplicationUser? User { get; set; }
     }
 }
