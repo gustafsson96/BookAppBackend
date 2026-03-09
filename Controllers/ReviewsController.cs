@@ -43,15 +43,14 @@ namespace BookAppBackend.Controllers
 
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized("User is not authenticated.")
+                return Unauthorized("User is not authenticated.");
             }
-
-                var reviews = await _context
+            var reviews = await _context
                 .Reviews.Where(r => r.UserId == userId)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
 
-                return Ok(reviews);
+            return Ok(reviews);
         }
 
         // POST: api/reviews
@@ -89,6 +88,46 @@ namespace BookAppBackend.Controllers
             };
 
             _context.Reviews.Add(review);
+            await _context.SaveChangesAsync();
+
+            return Ok(review);
+        }
+
+        // PUT: api/reviews/:id
+        // Update a review created by the logged in user
+        [Authorize]
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Review>> UpdateReview(int id, [FromBody] UpdateReviewDto dto)
+        {
+            // Get user 
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // Stop if user is not authenticated
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User is not authenticated.");
+            }
+
+            // Find the review in the database based on id
+            var review = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == id);
+
+            // Return error if no review can be found
+            if (review == null)
+            {
+                return NotFound("Review not found.");
+            }
+
+            // Prevent user to edit reviews that they have not created
+            if (review.UserId != userId)
+            {
+                return Forbid();
+            }
+
+            // Update review with new values
+            review.Text = dto.Text;
+            review.Rating = dto.Rating;
+
+            // Save to database
             await _context.SaveChangesAsync();
 
             return Ok(review);
