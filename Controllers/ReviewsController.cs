@@ -99,7 +99,7 @@ namespace BookAppBackend.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<Review>> UpdateReview(int id, [FromBody] UpdateReviewDto dto)
         {
-            // Get user 
+            // Get user
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             // Stop if user is not authenticated
@@ -108,7 +108,7 @@ namespace BookAppBackend.Controllers
                 return Unauthorized("User is not authenticated.");
             }
 
-            // Find the review in the database based on id
+            // Find the review in the database by id
             var review = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == id);
 
             // Return error if no review can be found
@@ -131,6 +131,45 @@ namespace BookAppBackend.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(review);
+        }
+
+        // DELETE: api/reviews/:id
+        // Delete an existing review created by the logged in user
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteReview(int id)
+        {
+            // Get user id
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // Stop if user is not authenticated
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User is not authenticated.");
+            }
+
+            // Find the review in the database by id
+            var review = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == id);
+
+            // Return error if no review is found
+            if (review == null)
+            {
+                return NotFound("Review not found.");
+            }
+
+            // Prevent users from deleting reviews that belong to another user
+            if (review.UserId != userId)
+            {
+                return Forbid();
+            }
+
+            // Remove the review from the database
+            _context.Reviews.Remove(review);
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
