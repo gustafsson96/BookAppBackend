@@ -94,6 +94,8 @@ namespace BookAppBackend.Controllers
             var review = new Review
             {
                 BookId = dto.BookId,
+                BookTitle = dto.BookTitle,
+                BookImage = dto.BookImage,
                 UserId = userId,
                 Text = dto.Text,
                 Rating = dto.Rating,

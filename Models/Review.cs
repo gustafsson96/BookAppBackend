@@ -14,6 +14,12 @@ namespace BookAppBackend.Models
         [Required]
         public string? BookId { get; set; }
 
+        // Book title
+        public string BookTitle { get; set; } = string.Empty;
+
+        // Book image
+        public string? BookImage { get; set; }
+
         // Id for the user who created the review
         [Required]
         public string? UserId { get; set; }

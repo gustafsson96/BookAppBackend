@@ -8,6 +8,11 @@ namespace BookAppBackend.Dtos
         public string? BookId { get; set; }
 
         [Required]
+        public string BookTitle { get; set; } = string.Empty;
+
+        public string? BookImage { get; set; }
+
+        [Required]
         public string? Text { get; set; }
 
         [Required]
