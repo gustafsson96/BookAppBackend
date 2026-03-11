@@ -52,8 +52,37 @@ namespace BookAppBackend.Controllers
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
-            // Return name if user has been created successfully
-            return Ok(new { user.DisplayName });
+            // Get secret key to generate token so user can be logged in after registration
+            var jwtKey = Environment.GetEnvironmentVariable("JWT_SECRET");
+            if (string.IsNullOrEmpty(jwtKey))
+                throw new Exception("JWT_SECRET is not set in environment variables.");
+
+            var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
+
+            // Define token content
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(
+                    new[]
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.Id),
+                        new Claim(ClaimTypes.Name, user.UserName!),
+                    }
+                ),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(keyBytes),
+                    SecurityAlgorithms.HmacSha256Signature
+                ),
+            };
+
+            // Create token
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var jwt = tokenHandler.WriteToken(token);
+
+            // Return token and name if user has been created successfully
+            return Ok(new { token = jwt, displayName = user.DisplayName });
         }
 
         // Login
