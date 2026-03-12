@@ -70,7 +70,7 @@ namespace BookAppBackend.Controllers
         // Create a new review for the logged in user
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Review>> CreateReview(CreateReviewDto dto)
+        public async Task<ActionResult<ReviewResponseDto>> CreateReview(CreateReviewDto dto)
         {
             // Get user id from JWT token claims
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -105,14 +105,30 @@ namespace BookAppBackend.Controllers
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
 
-            return Ok(review);
+            await _context.Entry(review).Reference(r => r.User).LoadAsync();
+
+            var response = new ReviewResponseDto
+            {
+                Id = review.Id,
+                BookId = review.BookId,
+                UserId = review.UserId,
+                DisplayName = review.User!.DisplayName,
+                Text = review.Text,
+                Rating = review.Rating,
+                CreatedAt = review.CreatedAt,
+            };
+
+            return Ok(response);
         }
 
         // PUT: api/reviews/:id
         // Update a review created by the logged in user
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<ActionResult<Review>> UpdateReview(int id, [FromBody] UpdateReviewDto dto)
+        public async Task<ActionResult<ReviewResponseDto>> UpdateReview(
+            int id,
+            [FromBody] UpdateReviewDto dto
+        )
         {
             // Get user
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -145,7 +161,20 @@ namespace BookAppBackend.Controllers
             // Save to database
             await _context.SaveChangesAsync();
 
-            return Ok(review);
+            await _context.Entry(review).Reference(r => r.User).LoadAsync();
+
+            var response = new ReviewResponseDto
+            {
+                Id = review.Id,
+                BookId = review.BookId,
+                UserId = review.UserId,
+                DisplayName = review.User!.DisplayName,
+                Text = review.Text,
+                Rating = review.Rating,
+                CreatedAt = review.CreatedAt,
+            };
+
+            return Ok(response);
         }
 
         // DELETE: api/reviews/:id
